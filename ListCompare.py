@@ -10,6 +10,8 @@ USAGE:
 -f2 - Name of the second file.
 -f1c - Column(s) to use from file one if file one is a csv file
 -f2c - Column(s) to use from file two if file two is a csv file
+-em - Exclude matches. Yes/True for exclusion, No/False/dont use argument for including
+-enm - Exclude non-matches. Yes/True for exclusion, No/False/dont use argument for including
 
 If you want to use more than one column from a csv (not as tested, but theoretically should still work), type the column
 names after the argument with commas (no spaces) separating the column names.
@@ -77,6 +79,8 @@ if __name__ == "__main__":
     parser.add_argument("-f2", "--filetwo", help="Second file to search")
     parser.add_argument("-f1c", "--fileonecolumns", required=False, help="CSV Column header(s) for file one.")
     parser.add_argument("-f2c", "--filetwocolumns", required=False, help="CSV Column header(s) for file two.")
+    parser.add_argument("-em", "--excludematches", required=False, help="Exclude matches from output.txt")
+    parser.add_argument("-enm", "--excludenotmatched", required=False, help="Exclude non-matches from output.txt")
 
     args = parser.parse_args()
 
@@ -88,16 +92,20 @@ if __name__ == "__main__":
 
     matches = f1_matches + f2_matches
     with open('output.txt', 'w') as output_file:
-        output_file.writelines(f'{'-'*10}MATCHES: {'-'*10}\n')
-        for line in matches:
-            output_file.writelines(f'{line}\n')
 
-        output_file.writelines(f'\n{'-'*10}END OF MATCHES{'-'*10}\n\n{'-'*10}START OF NOT MATCHED {args.filetwo}: {'-'*10}\n')
-        for line in f1_no_matches:
-            output_file.writelines(f'{line}\n')
-        output_file.writelines(f'\n{'-'*10}END OF NOT MATCHED {args.filetwo}{'-'*10}\n')
+        if not args.excludematches or str(args.excludenotmatched).casefold() in ['no', 'false']:
+            output_file.writelines(f'{'-'*10}MATCHES: {'-'*10}\n')
+            for line in matches:
+                output_file.writelines(f'{line}\n')
+            output_file.writelines(f'\n{'-'*10}END OF MATCHES{'-'*10}\n\n')
 
-        output_file.writelines(f'\n{'-'*10}START OF NOT MATCHED {args.fileone}: {'-'*10}\n')
-        for line in f2_no_matches:
-            output_file.writelines(f'{line}\n')
-        output_file.writelines(f'{'-'*10}END OF NOT MATCHED {args.fileone}{'-'*10}')
+        if not args.excludenotmatched or str(args.excludenotmatched).casefold() in ['no', 'false']:
+            output_file.writelines(f'{'-'*10}START OF NOT MATCHED {args.filetwo}: {'-'*10}\n')
+            for line in f1_no_matches:
+                output_file.writelines(f'{line}\n')
+            output_file.writelines(f'\n{'-'*10}END OF NOT MATCHED {args.filetwo}{'-'*10}\n')
+
+            output_file.writelines(f'\n{'-'*10}START OF NOT MATCHED {args.fileone}: {'-'*10}\n')
+            for line in f2_no_matches:
+                output_file.writelines(f'{line}\n')
+            output_file.writelines(f'{'-'*10}END OF NOT MATCHED {args.fileone}{'-'*10}')
