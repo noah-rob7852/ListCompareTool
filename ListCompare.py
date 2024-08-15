@@ -14,7 +14,7 @@ USAGE:
 If you want to use more than one column from a csv (not as tested, but theoretically should still work), type the column
 names after the argument with commas (no spaces) separating the column names.
 
-Script will write the common entries to an output.txt file
+Script will write the common entries and missing entries to an output.txt file
 """
 
 
@@ -92,12 +92,12 @@ if __name__ == "__main__":
         for line in matches:
             output_file.writelines(f'{line}\n')
 
-        output_file.writelines(f'\n{'-'*10}END OF MATCHES{'-'*10}\n\n{'-'*10}START OF NOT MATCHED FILE 1: {'-'*10}\n')
+        output_file.writelines(f'\n{'-'*10}END OF MATCHES{'-'*10}\n\n{'-'*10}START OF NOT MATCHED {args.filetwo}: {'-'*10}\n')
         for line in f1_no_matches:
             output_file.writelines(f'{line}\n')
-        output_file.writelines(f'\n{'-'*10}END OF NOT MATCHED FILE 1{'-'*10}\n')
+        output_file.writelines(f'\n{'-'*10}END OF NOT MATCHED {args.filetwo}{'-'*10}\n')
 
-        output_file.writelines(f'\n{'-'*10}START OF NOT MATCHED FILE 2: {'-'*10}\n')
+        output_file.writelines(f'\n{'-'*10}START OF NOT MATCHED {args.fileone}: {'-'*10}\n')
         for line in f2_no_matches:
             output_file.writelines(f'{line}\n')
-        output_file.writelines(f'{'-'*10}END OF NOT MATCHED FILE 1{'-'*10}')
+        output_file.writelines(f'{'-'*10}END OF NOT MATCHED {args.fileone}{'-'*10}')
