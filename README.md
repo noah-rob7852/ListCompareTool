@@ -18,6 +18,8 @@ USAGE:
 
 -enm - Exclude non-matches. Yes/True for exclusion, No/False/dont use argument for including
 
+-on - Output name. String name for text file
+
 
 If you want to use more than one column from a csv (not as tested, but theoretically should still work), type the column
 names after the argument with commas (no spaces) separating the column names.
