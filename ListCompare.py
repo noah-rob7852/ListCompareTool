@@ -83,7 +83,6 @@ def ensure_unique_values(input_list: list):
             seen_values.add(value)
             unique_data.append(item)
 
-    print(unique_data)
     return unique_data
 
 if __name__ == "__main__":
