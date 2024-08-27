@@ -12,11 +12,11 @@ USAGE:
 -f2c - Column(s) to use from file two if file two is a csv file
 -em - Exclude matches. Yes/True for exclusion, No/False/dont use argument for including
 -enm - Exclude non-matches. Yes/True for exclusion, No/False/dont use argument for including
+-on - Ouput name. String for name of text file
 
 If you want to use more than one column from a csv (not as tested, but theoretically should still work), type the column
 names after the argument with commas (no spaces) separating the column names.
 
-Script will write the common entries and missing entries to an output.txt file
 """
 
 
@@ -48,7 +48,6 @@ def compare(input_file_1, input_file_2):
     match_return_list = []
     no_match_return_list = []
 
-    # Create a set of exact values from input_file_2 (case-insensitive)
     input_file_2_values = set()
     for item in input_file_2:
         if isinstance(item, dict):
@@ -62,7 +61,7 @@ def compare(input_file_1, input_file_2):
             for value in line.values():
                 if value.lower() in input_file_2_values:
                     match_return_list.append(line)
-                    break  # No need to check other values if one matches
+                    break
                 else:
                     no_match_return_list.append(line)
         else:
@@ -73,39 +72,60 @@ def compare(input_file_1, input_file_2):
 
     return match_return_list, no_match_return_list
 
+def ensure_unique_values(input_list: list):
+    seen_values = set()
+    unique_data = []
+
+    for item in input_list:
+        value = list(item.values())[0]
+
+        if value not in seen_values:
+            seen_values.add(value)
+            unique_data.append(item)
+
+    print(unique_data)
+    return unique_data
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-f1", "--fileone", help="First file to search")
     parser.add_argument("-f2", "--filetwo", help="Second file to search")
     parser.add_argument("-f1c", "--fileonecolumns", required=False, help="CSV Column header(s) for file one.")
     parser.add_argument("-f2c", "--filetwocolumns", required=False, help="CSV Column header(s) for file two.")
-    parser.add_argument("-em", "--excludematches", required=False, help="Exclude matches from output.txt")
-    parser.add_argument("-enm", "--excludenotmatched", required=False, help="Exclude non-matches from output.txt")
+    parser.add_argument("-em", "--excludematches", required=False, help="Exclude matches to Output file")
+    parser.add_argument("-enm", "--excludenotmatched", required=False, help="Exclude non-matches to Output file")
+    parser.add_argument("-on", "--outputname", required=False, help="Specify file name")
+
 
     args = parser.parse_args()
 
     file_one = read_file(args.fileone, args.fileonecolumns)
     file_two = read_file(args.filetwo, args.filetwocolumns)
-
     f1_matches, f1_no_matches = compare(file_one, file_two)
     f2_matches, f2_no_matches = compare(file_two, file_one)
+    unmodified_matches = f1_matches + f2_matches
+    matches = ensure_unique_values(unmodified_matches)
 
-    matches = f1_matches + f2_matches
-    with open('output.txt', 'w') as output_file:
+    if args.outputname:
+        filename = args.outputname
+    else:
+        filename = 'output.txt'
+
+    with open(filename, 'w') as output_file:
 
         if not args.excludematches or str(args.excludenotmatched).casefold() in ['no', 'false']:
-            output_file.writelines(f'{'-'*10}MATCHES: {'-'*10}\n')
+            output_file.writelines(f'{'-'*10}MATCHES{'-'*10}\n')
             for line in matches:
                 output_file.writelines(f'{line}\n')
             output_file.writelines(f'\n{'-'*10}END OF MATCHES{'-'*10}\n\n')
 
         if not args.excludenotmatched or str(args.excludenotmatched).casefold() in ['no', 'false']:
-            output_file.writelines(f'{'-'*10}START OF NOT MATCHED {args.filetwo}: {'-'*10}\n')
+            output_file.writelines(f'{'-'*10}{args.fileone} MISSING FROM {args.filetwo}{'-'*10}\n')
             for line in f1_no_matches:
                 output_file.writelines(f'{line}\n')
-            output_file.writelines(f'\n{'-'*10}END OF NOT MATCHED {args.filetwo}{'-'*10}\n')
+            output_file.writelines(f'\n{'-'*10}END OF {args.fileone} MISSING FROM {args.filetwo}{'-'*10}\n')
 
-            output_file.writelines(f'\n{'-'*10}START OF NOT MATCHED {args.fileone}: {'-'*10}\n')
+            output_file.writelines(f'\n{'-'*10}{args.filetwo} MISSING FROM {args.fileone}{'-'*10}\n')
             for line in f2_no_matches:
                 output_file.writelines(f'{line}\n')
-            output_file.writelines(f'{'-'*10}END OF NOT MATCHED {args.fileone}{'-'*10}')
+            output_file.writelines(f'{'-'*10}END OF {args.filetwo} MISSING FROM {args.fileone}{'-'*10}')
